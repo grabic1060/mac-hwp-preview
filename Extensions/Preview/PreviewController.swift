@@ -1,5 +1,6 @@
 import AppKit
 import QuickLookUI
+import os
 
 @objc(PreviewController)
 final class PreviewController: NSViewController, QLPreviewingController {
@@ -14,7 +15,14 @@ final class PreviewController: NSViewController, QLPreviewingController {
         self.renderer = renderer
         view = renderer.webView
         renderer.render(url) { result in
-            switch result { case .success: handler(nil); case .failure(let error): handler(error) }
+            switch result {
+            case .success:
+                Logger(subsystem: "org.hwp-preview", category: "preview").notice("WASM preview complete")
+                handler(nil)
+            case .failure(let error):
+                Logger(subsystem: "org.hwp-preview", category: "preview").error("WASM preview failed")
+                handler(error)
+            }
         }
     }
     override func viewDidDisappear() { super.viewDidDisappear(); renderer?.dispose(); renderer = nil }

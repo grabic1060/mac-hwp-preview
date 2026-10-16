@@ -10,6 +10,11 @@ function zoom(value) { scale = value; pages.style.width = `${100 * scale}%`; }
 document.getElementById('minus').onclick = () => zoom(Math.max(0.5, scale - 0.25));
 document.getElementById('plus').onclick = () => zoom(Math.min(3, scale + 0.25));
 document.getElementById('fit').onclick = () => zoom(1);
+document.getElementById('go').onclick = () => {
+    const number = document.getElementById('page-number').valueAsNumber;
+    if (Number.isInteger(number) && number >= 1 && number <= pages.children.length)
+        pages.children[number - 1].scrollIntoView({block:'start'});
+};
 function safeSVG(source) {
     const parsed = new DOMParser().parseFromString(source, 'image/svg+xml');
     if (parsed.querySelector('parsererror') || parsed.documentElement.localName !== 'svg') throw new Error('invalidSVG');
@@ -43,6 +48,7 @@ window.renderDocument = async (base64, thumbnail) => {
         // Yield between pages so navigation/cancellation can release the WebView.
         if (i % 4 === 0) await new Promise(resolve => setTimeout(resolve, 0));
     }
+    document.getElementById('page-number').max = String(count);
     document.getElementById('status').textContent = `${count}쪽 · 실험적 미리보기: 글꼴·배치 차이 가능`;
     await Promise.all([...pages.querySelectorAll('image')].map(async el => {
         const image = new Image(); image.src = el.getAttribute('href') || el.getAttribute('xlink:href') || '';
@@ -55,4 +61,5 @@ window.renderDocument = async (base64, thumbnail) => {
             images: pages.querySelectorAll('image').length, width: box.width || svg.width.baseVal.value,
             height: box.height || svg.height.baseVal.value, fidelityVerified: false};
 };
-ready.then(() => window.webkit?.messageHandlers.ready.postMessage('ready')).catch(error => window.webkit?.messageHandlers.ready.postMessage({initializationError:String(error)}));
+const request = new URL(location.href).searchParams.get('request');
+ready.then(() => window.webkit?.messageHandlers.ready.postMessage({request,ready:true})).catch(() => window.webkit?.messageHandlers.ready.postMessage({request,ready:false}));

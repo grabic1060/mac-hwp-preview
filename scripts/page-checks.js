@@ -1,0 +1,15 @@
+const assert = (value, message) => { if (!value) throw new Error(message); };
+const pages = document.querySelectorAll('.page');
+assert(pages.length > 1, 'expected a multi-page fixture');
+assert([...pages].every(p => p.querySelector('svg')?.viewBox.baseVal.height > 0), 'page dimensions');
+const before = pages[0].getBoundingClientRect().width;
+document.getElementById('plus').click();
+assert(pages[0].getBoundingClientRect().width > before, 'zoom must enlarge page');
+document.getElementById('fit').click();
+assert(Math.abs(pages[0].getBoundingClientRect().width - before) < 1, 'fit width');
+document.getElementById('page-number').value = String(pages.length);
+document.getElementById('go').click();
+assert(window.scrollY > 0, 'last page navigation');
+assert(pages[pages.length - 1].textContent.length > 0, 'last page text');
+window.scrollTo(0,0);
+return {pages:pages.length, navigation:true,zoom:true};

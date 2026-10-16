@@ -67,6 +67,20 @@ public final class Renderer {
         }
     }
 
+    /// Read once with a hard byte cap, then validate the bytes actually passed to the engine.
+    public static func snapshot(_ url: URL, maximumBytes: Int) throws -> Data {
+        try validate(url, maximumBytes: maximumBytes)
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        let data = try handle.read(upToCount: maximumBytes + 1) ?? Data()
+        guard data.count <= maximumBytes else { throw PreviewFailure.oversized }
+        guard data.count > 8 else { throw PreviewFailure.invalid }
+        let signature: [UInt8] = url.pathExtension.lowercased() == "hwp"
+            ? [0xD0,0xCF,0x11,0xE0,0xA1,0xB1,0x1A,0xE1] : [0x50,0x4B,0x03,0x04]
+        guard data.starts(with: signature) else { throw PreviewFailure.invalid }
+        return data
+    }
+
     public func render(_ source: URL, cancellation: Cancellation = Cancellation()) throws -> RenderResult {
         if cancellation.isCancelled { throw PreviewFailure.cancelled }
         try Self.validate(source, maximumBytes: limits.inputBytes)

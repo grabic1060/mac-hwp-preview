@@ -3,7 +3,7 @@ import AppKit
 import WebKit
 import HWPPreviewCore
 let args = CommandLine.arguments
-if args.count != 4 { fputs("Usage: web-probe ASSETS INPUT OUTPUT.png\n", stderr); exit(2) }
+if args.count != 4 && args.count != 5 { fputs("Usage: web-probe ASSETS INPUT OUTPUT.png [CHECKS.js]\n", stderr); exit(2) }
 let app = NSApplication.shared
 app.setActivationPolicy(.prohibited)
 let renderer = WebRenderer(assets: URL(fileURLWithPath: args[1]))
@@ -18,11 +18,22 @@ renderer.render(URL(fileURLWithPath: args[2])) { result in
     case .success(var info):
         info["seconds"] = Date().timeIntervalSince(start)
         print(String(data: try! JSONSerialization.data(withJSONObject: info,options: .sortedKeys),encoding: .utf8)!)
-        renderer.webView.takeSnapshot(with: nil) { image,error in
-            defer { done = true }
-            guard let image, let tiff = image.tiffRepresentation,let bitmap = NSBitmapImageRep(data:tiff),let data = bitmap.representation(using:.png,properties:[:]) else { return }
-            do { try data.write(to: URL(fileURLWithPath:args[3])); success = true } catch { fputs("snapshot write failed\n",stderr) }
+        func snapshot() {
+            renderer.webView.takeSnapshot(with: nil) { image,error in
+                defer { done = true }
+                guard let image, let tiff = image.tiffRepresentation,let bitmap = NSBitmapImageRep(data:tiff),let data = bitmap.representation(using:.png,properties:[:]) else { return }
+                do { try data.write(to: URL(fileURLWithPath:args[3])); success = true } catch { fputs("snapshot write failed\n",stderr) }
+            }
         }
+        if args.count == 5 {
+            guard let checks = try? String(contentsOfFile: args[4], encoding: .utf8) else { done = true; return }
+            renderer.webView.callAsyncJavaScript(checks, arguments: [:], in: nil, in: .page) { result in
+                switch result {
+                case .success(let value): print("checks=\(value)"); snapshot()
+                case .failure(let error): fputs("checks failed: \(error)\n",stderr); done = true
+                }
+            }
+        } else { snapshot() }
     case .failure(let error): fputs("\(error.localizedDescription)\n",stderr); done = true
     }
 }
