@@ -1,5 +1,6 @@
 # macOS HWP·HWPX Quick Look 구현 계획서
 
+> 이 문서는 착수 당시의 계획입니다. 구현 진행 및 검증 결과는 [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md)에 기록하며, 원래의 통합 목표와 출시 기준을 유지합니다.
 작성일: 2026-10-15  
 상태: 구현 전 제안. 현재 저장소에는 구현 파일이 없으며, 이 문서만 작성했습니다.
 
