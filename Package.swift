@@ -1,0 +1,12 @@
+// swift-tools-version: 5.9
+import PackageDescription
+let package = Package(name: "HWPPreview", platforms: [.macOS(.v14)], products: [
+    .library(name: "HWPPreviewCore", targets: ["HWPPreviewCore"]),
+    .executable(name: "preview-probe", targets: ["PreviewProbe"]),
+    .executable(name: "web-probe", targets: ["WebProbe"])
+], targets: [
+    .target(name: "HWPPreviewCore"),
+    .executableTarget(name: "PreviewProbe", dependencies: ["HWPPreviewCore"]),
+    .executableTarget(name: "WebProbe", dependencies: ["HWPPreviewCore"]),
+    .testTarget(name: "HWPPreviewCoreTests", dependencies: ["HWPPreviewCore"])
+])
