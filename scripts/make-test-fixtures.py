@@ -49,3 +49,32 @@ put('header.hwp',compound())
 for name,flag in [('password',2),('distribution',4),('drm',16),('certificate',256),('certificate-drm',1024),('privacy',8192)]:put(name+'.hwp',compound(flag))
 cycle=compound();struct.pack_into('<I',cycle,516,1);put('cycle.hwp',cycle)
 mini=compound();struct.pack_into('<I',mini,1536,0);put('mini-cycle.hwp',mini)
+
+# HWP raw-DEFLATE streams may retain CRC32/ISIZE trailers.
+import zlib
+for suffix, trailer in [('raw', False), ('trailer', True), ('bad-trailer', True)]:
+    data = compound(); record = struct.pack('<I',16)
+    compressor = zlib.compressobj(wbits=-15); payload = compressor.compress(record)+compressor.flush()
+    if trailer: payload += struct.pack('<II', zlib.crc32(record), len(record))
+    if suffix == 'bad-trailer': payload = payload[:-1]+b'\x01'
+    off=1024+256; name='DocInfo\0'.encode('utf-16le');data[off:off+len(name)]=name
+    struct.pack_into('<H',data,off+64,len(name));data[off+66]=2;data[off+67]=1
+    for x in [68,72,76]:struct.pack_into('<I',data,off+x,0xffffffff)
+    struct.pack_into('<II',data,off+116,4,len(payload))
+    struct.pack_into('<I',data,1024+120,320)
+    struct.pack_into('<I',data,1536+16,0xfffffffe)
+    data[2304:2304+len(payload)]=payload
+    put('compressed-'+suffix+'.hwp',data)
+
+# A small on-disk CFB whose DocInfo expands beyond the per-stream budget.
+compressor=zlib.compressobj(wbits=-15)
+payload=compressor.compress(bytes(41*1024*1024))+compressor.flush()
+data=compound();count=(len(payload)+511)//512
+assert count+4 <= 128
+off=1024+256;name='DocInfo\0'.encode('utf-16le');data[off:off+len(name)]=name
+struct.pack_into('<H',data,off+64,len(name));data[off+66]=2;data[off+67]=1
+for x in [68,72,76]:struct.pack_into('<I',data,off+x,0xffffffff)
+struct.pack_into('<II',data,off+116,4,len(payload))
+for i in range(count):struct.pack_into('<I',data,512+(4+i)*4,5+i if i<count-1 else 0xfffffffe)
+data.extend(payload+bytes(count*512-len(payload)))
+put('expansion.hwp',data)

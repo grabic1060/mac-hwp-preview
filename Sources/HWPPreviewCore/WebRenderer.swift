@@ -34,6 +34,7 @@ public final class WebRenderer: NSObject, WKScriptMessageHandler, WKNavigationDe
     private var thumbnail = false
     private var timer: Timer?
     private var cancellation = Cancellation()
+    private let imageGuard = ImageGuard()
     private let timeout: TimeInterval
     private var generation = UUID().uuidString
     public init(assets: URL, timeout: TimeInterval = 30) {
@@ -46,12 +47,14 @@ public final class WebRenderer: NSObject, WKScriptMessageHandler, WKNavigationDe
         webView.navigationDelegate = self
         let handler = WeakMessageHandler(); handler.target = self
         configuration.userContentController.add(handler, name: "ready")
+        configuration.userContentController.addScriptMessageHandler(imageGuard, contentWorld: .page, name: "imageBudget")
     }
     public func render(_ url: URL, thumbnail: Bool = false, completion: @escaping (Result<[String: Any], Error>) -> Void) {
         cancel()
         generation = UUID().uuidString
         self.completion = completion
         self.thumbnail = thumbnail
+        imageGuard.total = 0
         cancellation = Cancellation()
         let token = cancellation, request = generation
         timer = Timer.scheduledTimer(withTimeInterval: timeout, repeats: false) { [weak self] _ in
@@ -100,7 +103,7 @@ public final class WebRenderer: NSObject, WKScriptMessageHandler, WKNavigationDe
         webView.stopLoading()
     }
     public func cancel() { cancellation.cancel(); generation = UUID().uuidString; stopEngine(); finish(.failure(PreviewFailure.cancelled)) }
-    public func dispose() { cancel(); webView.configuration.userContentController.removeScriptMessageHandler(forName: "ready") }
+    public func dispose() { cancel(); webView.configuration.userContentController.removeScriptMessageHandler(forName: "ready"); webView.configuration.userContentController.removeScriptMessageHandler(forName: "imageBudget") }
     public func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { finish(.failure(PreviewFailure.engineFailed)) }
     public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { finish(.failure(PreviewFailure.engineFailed)) }
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { finish(.failure(PreviewFailure.engineFailed)) }

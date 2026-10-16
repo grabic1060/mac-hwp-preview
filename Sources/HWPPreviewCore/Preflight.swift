@@ -38,6 +38,48 @@ public enum Preflight {
         output.count = expected
         return output
     }
+    private static func inflateBounded(_ data: Data, limit: Int, cancellation: Cancellation) throws -> Data? {
+        var stream = z_stream()
+        guard inflateInit2_(&stream, -MAX_WBITS, ZLIB_VERSION, Int32(MemoryLayout<z_stream>.size)) == Z_OK else { throw PreviewFailure.invalid }
+        defer { inflateEnd(&stream) }
+        return try data.withUnsafeBytes { input in
+            stream.next_in = UnsafeMutablePointer(mutating:input.bindMemory(to:Bytef.self).baseAddress)
+            stream.avail_in = uInt(data.count)
+            var result = Data(), chunk = [UInt8](repeating:0,count:65536)
+            while true {
+                if cancellation.isCancelled { throw PreviewFailure.cancelled }
+                let status = chunk.withUnsafeMutableBufferPointer { buffer in
+                    stream.next_out = buffer.baseAddress; stream.avail_out = uInt(buffer.count)
+                    return inflate(&stream,Z_NO_FLUSH)
+                }
+                let produced = chunk.count - Int(stream.avail_out)
+                guard result.count + produced <= limit else { throw PreviewFailure.oversized }
+                result.append(contentsOf:chunk.prefix(produced))
+                if status == Z_STREAM_END {
+                    let tail = Int(stream.total_in)
+                    if tail == data.count { return result }
+                    // Some HWP streams retain a gzip CRC32/ISIZE trailer after raw DEFLATE.
+                    if data.count - tail == 8 {
+                        let checksum = result.withUnsafeBytes { crc32(0,$0.bindMemory(to:Bytef.self).baseAddress,uInt(result.count)) }
+                        if try data.integer(tail) == checksum, try data.integer(tail + 4) == result.count { return result }
+                    }
+                    return nil
+                }
+                if status != Z_OK || produced == 0 && stream.avail_in == 0 { return nil }
+            }
+        }
+    }
+    private static func records(_ data: Data) throws {
+        var offset = 0, count = 0
+        while offset < data.count {
+            let header = try data.integer(offset); offset += 4; count += 1
+            guard count <= 200_000, (header >> 10) & 0x3ff <= 128 else { throw PreviewFailure.oversized }
+            var size = header >> 20
+            if size == 0xfff { size = try data.integer(offset); offset += 4 }
+            guard size <= data.count - offset else { throw PreviewFailure.invalid }
+            offset += size
+        }
+    }
     private static func zip(_ data: Data, _ cancellation: Cancellation) throws {
         guard data.count >= 22 else { throw PreviewFailure.invalid }
         var end: Int?
@@ -150,6 +192,7 @@ public enum Preflight {
         }
         let directory = try chain(data.integer(48))
         var root: (Int,Int)?, header: (Int,Int)?
+        var streams = [(String,Int,Int)](), declared = 0
         for offset in stride(from:0,to:directory.count,by:128) {
             let length = try directory.integer(offset + 64,2), type = try directory.integer(offset + 66,1)
             if type == 0 { continue }
@@ -157,24 +200,49 @@ public enum Preflight {
             let name = String(data:try directory.bytes(offset,length - 2),encoding:.utf16LittleEndian)
             let start = try directory.integer(offset + 116), lengthLow = try directory.integer(offset + 120)
             guard try directory.integer(offset + 124) == 0 else { throw PreviewFailure.oversized }
+            if type == 2 {
+                declared += lengthLow
+                guard declared <= 100 * 1024 * 1024, lengthLow <= 40 * 1024 * 1024 else { throw PreviewFailure.oversized }
+                streams.append((name ?? "",start,lengthLow))
+            }
             if type == 5 { guard root == nil else { throw PreviewFailure.invalid }; root = (start,lengthLow) }
             if type == 2 && name == "FileHeader" { guard header == nil else { throw PreviewFailure.invalid }; header = (start,lengthLow) }
         }
         guard let root, let header, header.1 >= 40, header.1 <= 4096 else { throw PreviewFailure.invalid }
-        let bytes: Data
-        if header.1 < 4096 {
-            let miniFAT = try chain(data.integer(60)), miniStream = try chain(root.0)
-            var id = header.0, result = Data(), seen = Set<Int>()
-            while result.count < header.1 {
-                guard seen.insert(id).inserted else { throw PreviewFailure.invalid }
-                result.append(try miniStream.bytes(id * 64,64)); id = try miniFAT.integer(id * 4)
+        var miniFAT: Data?, miniStream: Data?
+        func readStream(_ start: Int, _ length: Int) throws -> Data {
+            if length == 0 { return Data() }
+            if length >= 4096 {
+                let bytes = try chain(start)
+                guard bytes.count >= length, bytes.count - length < size else { throw PreviewFailure.invalid }
+                return Data(bytes.prefix(length))
             }
-            bytes = result
-        } else { bytes = try chain(header.0) }
+            if miniFAT == nil { miniFAT = try chain(data.integer(60)); miniStream = try chain(root.0) }
+            var id = start, result = Data(), seen = Set<Int>()
+            while result.count < length {
+                guard seen.insert(id).inserted else { throw PreviewFailure.invalid }
+                result.append(try miniStream!.bytes(id * 64,64)); id = try miniFAT!.integer(id * 4)
+            }
+            guard id == 0xfffffffe else { throw PreviewFailure.invalid }
+            return Data(result.prefix(length))
+        }
+        let bytes = try readStream(header.0,header.1)
         guard bytes.starts(with:Array("HWP Document File".utf8)), try bytes.integer(35,1) == 5 else { throw PreviewFailure.unsupported }
         let flags = try bytes.integer(36)
         // Password, distribution, DRM, certificate encryption/DRM and privacy protection: do not ask the engine to unlock them.
         guard flags & 0x2516 == 0 else { throw PreviewFailure.protectedDocument }
+        var expanded = 0
+        for (name,start,length) in streams {
+            let raw = try readStream(start,length)
+            let isRecords = name == "DocInfo" || name.range(of:"^Section[0-9]+$",options:.regularExpression) != nil
+            let candidate = flags & 1 != 0 && (isRecords || name.uppercased().hasPrefix("BIN"))
+            let inflated = try candidate ? inflateBounded(raw,limit:min(40 * 1024 * 1024,100 * 1024 * 1024 - expanded),cancellation:cancellation) : nil
+            if isRecords && flags & 1 != 0 && inflated == nil { throw PreviewFailure.invalid }
+            let contents = inflated ?? raw
+            expanded += contents.count
+            guard expanded <= 100 * 1024 * 1024 else { throw PreviewFailure.oversized }
+            if isRecords { try records(contents) }
+        }
     }
 }
 

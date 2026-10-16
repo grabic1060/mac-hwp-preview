@@ -26,20 +26,29 @@ export function safeSVG(source) {
             if (unsafe) { node.removeAttributeNode(attr); removed++; }
         }
     }
+    for (const image of parsed.querySelectorAll('image')) {
+        const href = image.getAttribute('href') || image.getAttribute('xlink:href') || '';
+        if (raster.test(href)) {
+            image.setAttribute('data-preview-image',href);
+            image.removeAttribute('href'); image.removeAttribute('xlink:href');
+        }
+    }
     return {svg: document.importNode(parsed.documentElement, true), removed};
 }
 
 export async function verifyImages(root) {
     let failed = 0;
     for (const element of root.querySelectorAll('image')) {
-        const source = element.getAttribute('href') || element.getAttribute('xlink:href') || '';
+        const source = element.getAttribute('data-preview-image') || element.getAttribute('href') || element.getAttribute('xlink:href') || '';
         if (reference.test(source)) continue;
         const image = new Image();
         try {
             if (!raster.test(source)) throw new Error('unsupportedImage');
+            const accepted = await window.webkit.messageHandlers.imageBudget.postMessage(source);
+            if (!accepted) throw new Error('imageLimit');
             image.src = source;
             await image.decode();
-            if (image.naturalWidth * image.naturalHeight > 40_000_000) throw new Error('imageLimit');
+            element.setAttribute('href',source); element.removeAttribute('data-preview-image');
         } catch {
             failed++;
             // Keep the image's original rectangle and transform, so the missing content is visible.

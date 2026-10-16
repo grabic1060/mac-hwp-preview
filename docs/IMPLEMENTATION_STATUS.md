@@ -49,3 +49,11 @@
 - [한컴 HWP 5.0 revision 1.3](https://cdn.hancom.com/link/docs/%ED%95%9C%EA%B8%80%EB%AC%B8%EC%84%9C%ED%8C%8C%EC%9D%BC%ED%98%95%EC%8B%9D_5.0_revision1.3.pdf): PDF 13쪽 FileHeader 보호 속성.
 - [한컴 HWPX 구조](https://tech.hancom.com/hwpxformat/): 패키지와 암호화 manifest.
 - [PKWARE ZIP specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT): ZIP 중앙/로컬 헤더·압축 및 CRC.
+
+### M4 자원 한도 보강
+
+- 번들 생성 시 RHWP WASM의 단일 memory 선언에 최대 4,096페이지(256 MiB)를 설정합니다. 메모리 최소값·섹션 형식이 예상과 다르면 빌드가 실패합니다. Node의 실제 WASM 검증과 한도 초과 `memory.grow` 실패를 확인했습니다. 이는 선형 메모리 상한이며 WebKit 프로세스 전체 RSS 상한은 아닙니다.
+- HWP의 DocInfo/Section 및 BIN 계열 압축 스트림에 항목 40 MiB·총량 100 MiB 제한과 본문 레코드 수·깊이 검사를 추가했습니다. 기존 파일에서 발견한 CRC32/ISIZE 종료부는 검증 후 허용합니다. HWP 확장 스토리지의 모든 압축 변종 지원은 아직 미확인입니다.
+- SVG 이미지를 DOM에 넣을 때 URL을 보류하고 ImageIO 메타데이터로 먼저 검사합니다. 이미지당 20 MiB·4천만 픽셀(프레임 합계), 요청당 8천만 픽셀을 넘으면 원래 영역에 누락 표시를 남깁니다.
+- Swift 15개 테스트와 WASM 변환기 Python 3개 테스트 통과. 실제 HWP/HWPX 본문·이미지·탐색 검사 통과. 원본 레이아웃의 정답 비교를 의미하지 않습니다.
+- WASM memory 필드 근거: [WebAssembly binary types](https://webassembly.github.io/spec/core/binary/types.html), [memory section](https://webassembly.github.io/spec/core/binary/modules.html) (2026-10-16 접속 확인).

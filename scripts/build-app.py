@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build native app extensions with Xcode's Swift compiler; no project generator required."""
-import os, pathlib, plistlib, shutil, subprocess, time
+import os, pathlib, plistlib, shutil, subprocess
+from wasm_limits import cap_memory
 root = pathlib.Path(__file__).resolve().parent.parent
 os.chdir(root)
 out = root / '.build' / 'app'
@@ -54,6 +55,7 @@ for name, point, principal, source in [
     shutil.copytree(root/'Resources/Web',web)
     for filename in ['rhwp.js','rhwp_bg.wasm','LICENSE']:
         shutil.copy2(root/'.build/wasm/package'/filename,web/filename)
+    (web/'rhwp_bg.wasm').write_bytes(cap_memory((web/'rhwp_bg.wasm').read_bytes()))
     ent = out/'extension.entitlements'
     plist(ent,{'com.apple.security.app-sandbox':True,'com.apple.security.files.user-selected.read-only':True,'com.apple.security.network.client':True})
     run('codesign','--force','--sign','-','--entitlements',ent,c.parent)
