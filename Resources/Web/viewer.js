@@ -1,10 +1,7 @@
-import init, { HwpDocument } from './rhwp.js';
 import { safeSVG, verifyImages } from './svg.js';
-const canvas = document.createElement('canvas');
-const context = canvas.getContext('2d');
-globalThis.measureTextWidth = (font, text) => { context.font = font; return context.measureText(text).width; };
-const ready = init({module_or_path: new URL('./rhwp_bg.wasm', import.meta.url)});
-let doc;
+let worker;
+let rejectRendering;
+window.cancelRendering = () => { worker?.terminate(); worker = undefined; rejectRendering?.(new Error('cancelled')); rejectRendering = undefined; };
 let scale = 1;
 const pages = document.getElementById('pages');
 function zoom(value) { scale = value; pages.style.width = `${100 * scale}%`; }
@@ -17,32 +14,33 @@ document.getElementById('go').onclick = () => {
         pages.children[number - 1].scrollIntoView({block:'start'});
 };
 window.renderDocument = async (base64, thumbnail) => {
-    await ready;
-    if (doc) doc.free();
+    window.cancelRendering();
     pages.replaceChildren();
     document.body.classList.toggle('thumbnail', thumbnail);
-    const data = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-    doc = new HwpDocument(data);
-    const count = doc.pageCount();
-    if (!Number.isInteger(count) || count < 1 || count > 500) throw new Error('pageLimit');
-    let bytes = 0;
-    let removed = 0;
-    let images = 0;
-    const target = thumbnail ? 1 : count;
-    for (let i = 0; i < target; i++) {
-        const source = doc.renderPageSvg(i);
-        bytes += source.length;
-        if (bytes > 100 * 1024 * 1024) throw new Error('outputLimit');
-        const page = document.createElement('section'); page.className = 'page'; page.setAttribute('aria-label', `${i+1}쪽`);
-        const sanitized = safeSVG(source); removed += sanitized.removed;
-        images += sanitized.svg.querySelectorAll('image').length;
-        page.append(sanitized.svg); pages.append(page);
-        // Yield between pages so navigation/cancellation can release the WebView.
-        if (i % 4 === 0) await new Promise(resolve => setTimeout(resolve, 0));
-    }
+    const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+    let count = 0, removed = 0, images = 0, target = 0;
+    const engineWarnings = await new Promise((resolve,reject) => {
+        rejectRendering = reject;
+        worker = new Worker(new URL('./engine-worker.js',import.meta.url),{type:'module'});
+        worker.onerror = () => { window.cancelRendering(); reject(new Error('engineFailed')); };
+        worker.onmessage = ({data}) => {
+            try {
+                if (data.kind === 'start') count = data.count;
+                else if (data.kind === 'page') {
+                    const sanitized = safeSVG(data.source); removed += sanitized.removed;
+                    images += sanitized.svg.querySelectorAll('image').length;
+                    const page = document.createElement('section'); page.className = 'page';
+                    page.setAttribute('aria-label',`${data.index+1}쪽`);
+                    page.append(sanitized.svg); pages.append(page); target++;
+                } else if (data.kind === 'done') {
+                    worker.terminate(); worker = undefined; rejectRendering = undefined; resolve(data.warnings);
+                } else if (data.kind === 'error') throw new Error('engineFailed');
+            } catch (error) { window.cancelRendering(); reject(error); }
+        };
+        worker.postMessage({bytes,thumbnail},[bytes.buffer]);
+    });
     document.getElementById('page-number').max = String(count);
     const imageFailures = await verifyImages(pages);
-    const engineWarnings = JSON.parse(doc.getValidationWarnings()).count || 0;
     const warnings = removed + imageFailures + engineWarnings;
     document.getElementById('status').textContent = `${count}쪽 · 실험적 미리보기: 글꼴·배치 차이 가능${warnings ? ` · 표시 주의 ${warnings}건 (이미지 실패 ${imageFailures}건)` : ''}`;
     await new Promise(resolve => setTimeout(resolve, 0));
@@ -53,4 +51,4 @@ window.renderDocument = async (base64, thumbnail) => {
             height: box.height || svg.height.baseVal.value, fidelityVerified: false};
 };
 const request = new URL(location.href).searchParams.get('request');
-ready.then(() => window.webkit?.messageHandlers.ready.postMessage({request,ready:true})).catch(() => window.webkit?.messageHandlers.ready.postMessage({request,ready:false}));
+window.webkit?.messageHandlers.ready.postMessage({request,ready:true});

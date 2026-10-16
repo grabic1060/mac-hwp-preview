@@ -1,0 +1,12 @@
+const pending = window.renderDocument(fixture,false);
+let cancelled = false;
+const caught = pending.catch(error => { cancelled = String(error).includes('cancelled'); });
+await new Promise(resolve => setTimeout(resolve,10));
+window.cancelRendering();
+await caught;
+if (!cancelled) throw new Error('active worker was not cancelled');
+const info = await window.renderDocument(fixture,false);
+if (info.pages < 1 || info.rendered !== info.pages) throw new Error('request after cancellation failed');
+await new Promise(resolve => setTimeout(resolve,100));
+if (document.querySelectorAll('.page').length !== info.pages) throw new Error('stale worker appended pages');
+return {cancellation:true,recovery:true,pages:info.pages};

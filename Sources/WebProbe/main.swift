@@ -27,7 +27,8 @@ renderer.render(URL(fileURLWithPath: args[2])) { result in
         }
         if args.count == 5 {
             guard let checks = try? String(contentsOfFile: args[4], encoding: .utf8) else { done = true; return }
-            renderer.webView.callAsyncJavaScript(checks, arguments: [:], in: nil, in: .page) { result in
+            let fixture = (try? Data(contentsOf: URL(fileURLWithPath: args[2])).base64EncodedString()) ?? ""
+            renderer.webView.callAsyncJavaScript(checks, arguments: ["fixture":fixture], in: nil, in: .page) { result in
                 switch result {
                 case .success(let value): print("checks=\(value)"); snapshot()
                 case .failure(let error): fputs("checks failed: \(error)\n",stderr); done = true

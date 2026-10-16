@@ -48,7 +48,7 @@ for name, point, principal, source in [
     if name == 'Thumbnail': attrs['QLThumbnailMinimumDimension'] = 0
     c = bundle(appc/'PlugIns'/f'{name}.appex',name,'org.hwp-preview.app.'+name.lower(),
                dict(NSExtensionPointIdentifier=point,NSExtensionPrincipalClass=principal,NSExtensionAttributes=attrs))
-    run('xcrun','swiftc',*flags,'-parse-as-library','-application-extension',core,root/'Sources/HWPPreviewCore/WebRenderer.swift',source,
+    run('xcrun','swiftc',*flags,'-parse-as-library','-application-extension',*sorted((root/'Sources/HWPPreviewCore').glob('*.swift')),source,'-I',root/'Sources/CZlib',
         '-Xlinker','-e','-Xlinker','_NSExtensionMain','-o',c/'MacOS'/name)
     web = c/'Resources/Web'
     shutil.copytree(root/'Resources/Web',web)

@@ -32,3 +32,20 @@
 - WebKit 회귀 검사에서 링크 본문 보존, 외부 이미지·스크립트 제거, clip 유지, 손상 이미지 2개의 자리 표시, 정상 PNG 디코딩을 통과했습니다. 외부 fetch가 `connect-src` CSP 위반으로 차단되는 것도 확인했습니다.
 - HWP 표지 문서 이미지 3개, HWPX 이미지 문서 5쪽/이미지 5개가 디코딩 오류 없이 표시됐습니다. HWPX XML의 `pic` 5개와 대조했습니다. HWPX 표 문서 XML에는 표 15개가 있으며 첫 페이지 표 표시를 시각 확인했습니다.
 - 표 병합·반복 머리행·다양한 감싸기와 모든 페이지 개체의 좌표 정확도는 공식 기준 출력과 비교해야 합니다. 현재의 개수/디코딩/시각 검사는 그 판정을 대체하지 않습니다.
+
+## M4: 입력 방어와 취소 가능한 처리 (2026-10-16)
+
+- WASM을 module Web Worker로 분리했습니다. 타임아웃·취소 시 Worker를 종료하고, 교체 요청은 이전 결과를 무시합니다. 컨테이너 검사는 Swift 백그라운드 큐에서 수행합니다.
+- HWPX의 중앙/로컬 ZIP 헤더 일치, CRC, 중복/이탈 경로, 암호화, 실제 압축 해제 크기(항목 40 MiB/총 100 MiB), 항목 4,096개 제한을 검사합니다. ZIP64·분할 ZIP·지원하지 않는 압축법은 거부합니다.
+- XML DTD/엔티티 선언을 파서 전에 거부하고, 깊이 128·파일별 요소 200,000개를 제한합니다. 암호화 manifest를 거부합니다.
+- HWP CFB FAT/mini-FAT의 범위와 순환, FileHeader 버전 및 암호·배포용·DRM·인증서·개인정보 보호 플래그를 검사합니다. 보호 해제는 시도하지 않습니다.
+- 11개 XCTest(직접 생성한 구조 fixture와 여러 절단 경계 포함)를 통과했습니다. 실제 HWP/HWPX에서 Worker 취소·재요청 검사, 네이티브 요청 교체·강제 타임아웃·renderer 해제 검사를 통과했습니다.
+- Web Worker 응답 후 500쪽·SVG 100 MiB 제한도 적용합니다. 다만 WASM 내부의 순간 메모리 사용 상한, HWP의 모든 스트림 압축 해제 총량, 이미지 디코딩 전 픽셀 제한은 아직 강제하지 못합니다. 이 항목은 정식 출시 차단 사유로 유지합니다.
+- 합성 구조 fixture는 실제 정상 문서 60개/오류 문서 30개 기준 문서군을 대체하지 않습니다.
+
+### 입력 구조 근거 (2026-10-16 접속 확인)
+
+- [Microsoft CFB Header](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-cfb/05060311-bfce-4b12-874d-71fd4ce63aea): FAT/mini-FAT 및 섹터 정보.
+- [한컴 HWP 5.0 revision 1.3](https://cdn.hancom.com/link/docs/%ED%95%9C%EA%B8%80%EB%AC%B8%EC%84%9C%ED%8C%8C%EC%9D%BC%ED%98%95%EC%8B%9D_5.0_revision1.3.pdf): PDF 13쪽 FileHeader 보호 속성.
+- [한컴 HWPX 구조](https://tech.hancom.com/hwpxformat/): 패키지와 암호화 manifest.
+- [PKWARE ZIP specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT): ZIP 중앙/로컬 헤더·압축 및 CRC.

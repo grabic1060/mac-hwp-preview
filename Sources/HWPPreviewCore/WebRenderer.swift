@@ -12,14 +12,15 @@ public final class AssetHandler: NSObject, WKURLSchemeHandler {
     private let directory: URL
     public init(directory: URL) { self.directory = directory }
     public func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
-        let names = ["index.html":"text/html", "viewer.js":"text/javascript", "svg.js":"text/javascript", "rhwp.js":"text/javascript", "rhwp_bg.wasm":"application/wasm"]
+        let names = ["index.html":"text/html", "viewer.js":"text/javascript", "svg.js":"text/javascript", "engine-worker.js":"text/javascript", "rhwp.js":"text/javascript", "rhwp_bg.wasm":"application/wasm"]
         guard let url = urlSchemeTask.request.url, url.host == "assets",
               let mime = names[String(url.path.dropFirst())] else {
             urlSchemeTask.didFailWithError(PreviewFailure.invalid); return
         }
         do {
             let data = try Data(contentsOf: directory.appendingPathComponent(String(url.path.dropFirst())))
-            urlSchemeTask.didReceive(HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": mime, "Content-Length": String(data.count)])!)
+            let policy = "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'unsafe-inline'; img-src data:; connect-src 'self'; font-src data:; worker-src 'self'; base-uri 'none'; form-action 'none'"
+            urlSchemeTask.didReceive(HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": mime, "Content-Length": String(data.count), "Content-Security-Policy":policy])!)
             urlSchemeTask.didReceive(data); urlSchemeTask.didFinish()
         } catch { urlSchemeTask.didFailWithError(error) }
     }
@@ -32,8 +33,11 @@ public final class WebRenderer: NSObject, WKScriptMessageHandler, WKNavigationDe
     private var input: Data?
     private var thumbnail = false
     private var timer: Timer?
+    private var cancellation = Cancellation()
+    private let timeout: TimeInterval
     private var generation = UUID().uuidString
-    public init(assets: URL) {
+    public init(assets: URL, timeout: TimeInterval = 30) {
+        self.timeout = timeout
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
         configuration.setURLSchemeHandler(AssetHandler(directory: assets), forURLScheme: "hwp-preview")
@@ -48,13 +52,27 @@ public final class WebRenderer: NSObject, WKScriptMessageHandler, WKNavigationDe
         generation = UUID().uuidString
         self.completion = completion
         self.thumbnail = thumbnail
-        do {
-            input = try Renderer.snapshot(url, maximumBytes: 50 * 1024 * 1024)
-            timer = Timer.scheduledTimer(withTimeInterval: 30, repeats: false) { [weak self] _ in
-                self?.finish(.failure(PreviewFailure.timeout)); self?.webView.stopLoading()
+        cancellation = Cancellation()
+        let token = cancellation, request = generation
+        timer = Timer.scheduledTimer(withTimeInterval: timeout, repeats: false) { [weak self] _ in
+            self?.cancellation.cancel(); self?.stopEngine(); self?.finish(.failure(PreviewFailure.timeout))
+        }
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let result = Result { () -> Data in
+                let data = try Renderer.snapshot(url, maximumBytes: 50 * 1024 * 1024)
+                try Preflight.check(data, extension: url.pathExtension, cancellation: token)
+                return data
             }
-            webView.load(URLRequest(url: URL(string: "hwp-preview://assets/index.html?request=\(generation)")!))
-        } catch { finish(.failure(error)) }
+            DispatchQueue.main.async {
+                guard let self, self.generation == request, self.completion != nil else { return }
+                switch result {
+                case .success(let data):
+                    self.input = data
+                    self.webView.load(URLRequest(url: URL(string: "hwp-preview://assets/index.html?request=\(request)")!))
+                case .failure(let error): self.finish(.failure(error))
+                }
+            }
+        }
     }
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard completion != nil, let input else { return }
@@ -77,7 +95,11 @@ public final class WebRenderer: NSObject, WKScriptMessageHandler, WKNavigationDe
         timer?.invalidate(); timer = nil; input = nil
         let callback = completion; completion = nil; callback?(result)
     }
-    public func cancel() { generation = UUID().uuidString; finish(.failure(PreviewFailure.cancelled)); webView.stopLoading() }
+    private func stopEngine() {
+        webView.evaluateJavaScript("window.cancelRendering?.()", completionHandler: nil)
+        webView.stopLoading()
+    }
+    public func cancel() { cancellation.cancel(); generation = UUID().uuidString; stopEngine(); finish(.failure(PreviewFailure.cancelled)) }
     public func dispose() { cancel(); webView.configuration.userContentController.removeScriptMessageHandler(forName: "ready") }
     public func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { finish(.failure(PreviewFailure.engineFailed)) }
     public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { finish(.failure(PreviewFailure.engineFailed)) }

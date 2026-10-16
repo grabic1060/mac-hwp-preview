@@ -5,9 +5,10 @@ import Darwin
 import os
 
 public enum PreviewFailure: Error, LocalizedError, Equatable {
-    case unsupported, invalid, oversized, cancelled, timeout, engineMissing, engineFailed, invalidPDF
+    case protectedDocument, unsupported, invalid, oversized, cancelled, timeout, engineMissing, engineFailed, invalidPDF
     public var errorDescription: String? {
         switch self {
+        case .protectedDocument: return "암호·배포용·DRM 문서는 미리보기에서 지원하지 않습니다."
         case .unsupported: return "HWP 5.x 또는 HWPX 파일을 선택해 주세요."
         case .invalid: return "문서가 손상되었거나 읽을 수 없는 형식입니다."
         case .oversized: return "미리보기 처리 한도를 초과한 문서입니다."
@@ -95,8 +96,9 @@ public final class Renderer {
         // Snapshot prevents a renamed/replaced original from changing during rendering.
         let input = directory.appendingPathComponent("input." + source.pathExtension.lowercased())
         logger.notice("phase=snapshot")
-        try FileManager.default.copyItem(at: source, to: input)
-        try Self.validate(input, maximumBytes: limits.inputBytes)
+        let snapshot = try Self.snapshot(source, maximumBytes: limits.inputBytes)
+        try Preflight.check(snapshot, extension: source.pathExtension, cancellation: cancellation)
+        try snapshot.write(to: input)
         let output = directory.appendingPathComponent("preview.pdf")
         let task = Process()
         task.executableURL = executable
