@@ -12,7 +12,7 @@ public final class AssetHandler: NSObject, WKURLSchemeHandler {
     private let directory: URL
     public init(directory: URL) { self.directory = directory }
     public func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
-        let names = ["index.html":"text/html", "viewer.js":"text/javascript", "rhwp.js":"text/javascript", "rhwp_bg.wasm":"application/wasm"]
+        let names = ["index.html":"text/html", "viewer.js":"text/javascript", "svg.js":"text/javascript", "rhwp.js":"text/javascript", "rhwp_bg.wasm":"application/wasm"]
         guard let url = urlSchemeTask.request.url, url.host == "assets",
               let mime = names[String(url.path.dropFirst())] else {
             urlSchemeTask.didFailWithError(PreviewFailure.invalid); return
