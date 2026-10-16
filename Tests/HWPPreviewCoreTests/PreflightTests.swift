@@ -7,7 +7,7 @@ final class PreflightTests: XCTestCase {
     }
     func check(_ name: String) throws { try Preflight.check(fixture(name), extension: (name as NSString).pathExtension) }
     func testPlainContainersPass() throws {
-        for name in ["stored.hwpx","deflate.hwpx","header.hwp","compressed-raw.hwp","compressed-trailer.hwp"] { XCTAssertNoThrow(try check(name),name) }
+        for name in ["stored.hwpx","no-manifest.hwpx","deflate.hwpx","header.hwp","compressed-raw.hwp","compressed-trailer.hwp"] { XCTAssertNoThrow(try check(name),name) }
     }
     func testProtectedDocumentsRejectedBeforeEngine() throws {
         for name in ["protected.hwpx","encrypted.hwpx","password.hwp","distribution.hwp","drm.hwp","certificate.hwp","certificate-drm.hwp","privacy.hwp"] {

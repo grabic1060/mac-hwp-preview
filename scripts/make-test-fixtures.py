@@ -78,3 +78,10 @@ struct.pack_into('<II',data,off+116,4,len(payload))
 for i in range(count):struct.pack_into('<I',data,512+(4+i)*4,5+i if i<count-1 else 0xfffffffe)
 data.extend(payload+bytes(count*512-len(payload)))
 put('expansion.hwp',data)
+
+# Unencrypted HWPX packages encountered in the corpus may omit manifest.xml.
+buffer=io.BytesIO()
+with zipfile.ZipFile(buffer,'w') as z:
+    for name,value in [('mimetype','application/hwp+zip'),('Contents/content.hpf','<package/>')]:
+        z.writestr(zipfile.ZipInfo(name,date_time=(2026,1,1,0,0,0)),value)
+put('no-manifest.hwpx',buffer.getvalue())

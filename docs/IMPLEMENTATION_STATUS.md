@@ -57,3 +57,9 @@
 - SVG 이미지를 DOM에 넣을 때 URL을 보류하고 ImageIO 메타데이터로 먼저 검사합니다. 이미지당 20 MiB·4천만 픽셀(프레임 합계), 요청당 8천만 픽셀을 넘으면 원래 영역에 누락 표시를 남깁니다.
 - Swift 15개 테스트와 WASM 변환기 Python 3개 테스트 통과. 실제 HWP/HWPX 본문·이미지·탐색 검사 통과. 원본 레이아웃의 정답 비교를 의미하지 않습니다.
 - WASM memory 필드 근거: [WebAssembly binary types](https://webassembly.github.io/spec/core/binary/types.html), [memory section](https://webassembly.github.io/spec/core/binary/modules.html) (2026-10-16 접속 확인).
+
+### M4 확장 문서군 회귀
+
+- RHWP v0.8.7 공개 샘플에서 HWP 30개/HWPX 30개를 선택하고 Git blob 해시를 고정했습니다. 문서 자체는 로컬 `.build/corpus`에만 둡니다.
+- 첫 실행 59/60 통과. 암호화 manifest가 생략된 HWPX 1개가 과도한 필수 항목 검사에 걸린 문제를 수정했습니다. 모든 실제 XML의 암호화·DTD·손상 검사는 유지합니다. 회귀 fixture를 추가했습니다.
+- 이 문서군은 독립 공식 출력과 사용 허가를 확정한 기준 문서군이 아닙니다. 각 30개라는 수량만으로 원래 출시 게이트를 통과했다고 판정하지 않습니다.

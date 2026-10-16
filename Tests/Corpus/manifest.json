@@ -1,0 +1,366 @@
+{
+  "upstreamTag": "v0.8.7",
+  "purpose": "Local functional smoke only; no official reference outputs or redistribution permission assumed.",
+  "documents": [
+    {
+      "id": "hwp-01",
+      "path": "samples/basic/BlogForm_BookReview.hwp",
+      "gitBlobSha1": "bb1ef6e38a2b230ff5e068d7dee88dd6b9bd6595",
+      "size": 24576
+    },
+    {
+      "id": "hwp-02",
+      "path": "samples/basic/BlogForm_MovieReview.hwp",
+      "gitBlobSha1": "074c8337d0341808e782f9a308f0fa79ee7b2f2d",
+      "size": 26112
+    },
+    {
+      "id": "hwp-03",
+      "path": "samples/basic/BlogForm_Recipe.hwp",
+      "gitBlobSha1": "b17512493d86bbff404da5a83ec5bee0cf15d7d2",
+      "size": 29696
+    },
+    {
+      "id": "hwp-04",
+      "path": "samples/basic/BookReview.hwp",
+      "gitBlobSha1": "8db02de3e1b31fb160037fc6ebc76e99268473fe",
+      "size": 142848
+    },
+    {
+      "id": "hwp-05",
+      "path": "samples/basic/Hyper(hwp2010).hwp",
+      "gitBlobSha1": "2b89837727f6396d041f7a374fcaaf94b70d1231",
+      "size": 110080
+    },
+    {
+      "id": "hwp-06",
+      "path": "samples/basic/KTX-003.hwp",
+      "gitBlobSha1": "d5ceedc1651427f1b939a69b4b0d5593a78bc3d5",
+      "size": 66048
+    },
+    {
+      "id": "hwp-07",
+      "path": "samples/basic/KTX.hwp",
+      "gitBlobSha1": "ea34e3edc3d91b14abb7ca35a2c4f87ab3ff9110",
+      "size": 66048
+    },
+    {
+      "id": "hwp-08",
+      "path": "samples/basic/NewYear_s_Day.hwp",
+      "gitBlobSha1": "bef16f2f254d1ec008593ed527bb6eace22da526",
+      "size": 95232
+    },
+    {
+      "id": "hwp-09",
+      "path": "samples/basic/Textmail.hwp",
+      "gitBlobSha1": "5b96b157f4abc89321351e193bdbd28f12556d21",
+      "size": 34816
+    },
+    {
+      "id": "hwp-10",
+      "path": "samples/basic/Worldcup_FIFA2010_32.hwp",
+      "gitBlobSha1": "6a3a6fb35c3cf17636307c1a7f6cfc02be70576e",
+      "size": 314368
+    },
+    {
+      "id": "hwp-11",
+      "path": "samples/basic/calendar_monthly.hwp",
+      "gitBlobSha1": "50d4dbce2248d1848072d13487a279c6d66270fc",
+      "size": 29696
+    },
+    {
+      "id": "hwp-12",
+      "path": "samples/basic/calendar_year.hwp",
+      "gitBlobSha1": "cb6e6efd6d0627dcebdf965b867b2d8a3aa6bc4e",
+      "size": 55296
+    },
+    {
+      "id": "hwp-13",
+      "path": "samples/basic/english.hwp",
+      "gitBlobSha1": "1cc71c8c93681c3e125c385fd0a3265d3a986a6c",
+      "size": 29184
+    },
+    {
+      "id": "hwp-14",
+      "path": "samples/basic/issue2007_nested_cell_pagination_42065.hwp",
+      "gitBlobSha1": "f6f047708aed3ca5b603fde2c8d41d40c2ba4b98",
+      "size": 51712
+    },
+    {
+      "id": "hwp-15",
+      "path": "samples/basic/pau-004.hwp",
+      "gitBlobSha1": "e6e6b65ef44e48532e9dae54df319f46e6ef7636",
+      "size": 16384
+    },
+    {
+      "id": "hwp-16",
+      "path": "samples/basic/request.hwp",
+      "gitBlobSha1": "e6ce421d5ed9b45e6df42fdd46fcdcfa03ffb9dc",
+      "size": 65536
+    },
+    {
+      "id": "hwp-17",
+      "path": "samples/basic/shortcut.hwp",
+      "gitBlobSha1": "0df918bf9fb7d4b9dfce853e5b8a28f6192ccc6d",
+      "size": 43008
+    },
+    {
+      "id": "hwp-18",
+      "path": "samples/hwpx/hancom-hwp/2025년 1분기 해외직접투자 보도자료f.hwp",
+      "gitBlobSha1": "9c43c02285d760967dabb5431a6a454dbb799009",
+      "size": 115200
+    },
+    {
+      "id": "hwp-19",
+      "path": "samples/hwpx/hancom-hwp/2025년 2분기 해외직접투자 (최종).hwp",
+      "gitBlobSha1": "df6ea1a07ebe8e5c67bbc540255ce0eae12d09b8",
+      "size": 108544
+    },
+    {
+      "id": "hwp-20",
+      "path": "samples/hwpx/hancom-hwp/activity_report.hwp",
+      "gitBlobSha1": "800a92b6b78e730f8f78e7df7be875f53c6d6971",
+      "size": 50176
+    },
+    {
+      "id": "hwp-21",
+      "path": "samples/hwpx/hancom-hwp/blank_hwpx.hwp",
+      "gitBlobSha1": "adc3009db6f3f292643fda4abc12591c15af94d7",
+      "size": 12800
+    },
+    {
+      "id": "hwp-22",
+      "path": "samples/hwpx/hancom-hwp/business_overview.hwp",
+      "gitBlobSha1": "6bd9dff71e509db69177d6a1c3ea51b543d85c50",
+      "size": 47616
+    },
+    {
+      "id": "hwp-23",
+      "path": "samples/hwpx/hancom-hwp/expense_report.hwp",
+      "gitBlobSha1": "a6a11c44f6d9f1e376b9a4fb7e75dc7adaf1143d",
+      "size": 34816
+    },
+    {
+      "id": "hwp-24",
+      "path": "samples/hwpx/hancom-hwp/form-002.hwp",
+      "gitBlobSha1": "8436d745a74331d82029b7aab4713649c1c2c99c",
+      "size": 146944
+    },
+    {
+      "id": "hwp-25",
+      "path": "samples/hwpx/hancom-hwp/hwpx-h-02.hwp",
+      "gitBlobSha1": "066836afc5d322467816162b13a67c91d799e70b",
+      "size": 108544
+    },
+    {
+      "id": "hwp-26",
+      "path": "samples/hwpx/hancom-hwp/hwpx-h-03.hwp",
+      "gitBlobSha1": "b26b8fa962e3a04039b6bf1799c75cedb082aad4",
+      "size": 115200
+    },
+    {
+      "id": "hwp-27",
+      "path": "samples/hwpx/hancom-hwp/hy-001.hwp",
+      "gitBlobSha1": "432713682973189b220a13da67c3c326742591cb",
+      "size": 153600
+    },
+    {
+      "id": "hwp-28",
+      "path": "samples/hwpx/hancom-hwp/hy-002.hwp",
+      "gitBlobSha1": "a4ae0f9d7c86c7f0659098822ed8bbd704cdd403",
+      "size": 109056
+    },
+    {
+      "id": "hwp-29",
+      "path": "samples/hwpx/hancom-hwp/issue_157.hwp",
+      "gitBlobSha1": "034486202eab30eed644586c53535043f955ea6d",
+      "size": 36352
+    },
+    {
+      "id": "hwp-30",
+      "path": "samples/hwpx/hancom-hwp/issue_241.hwp",
+      "gitBlobSha1": "f3151495e55efcbbb925f1449bc9113a7a58f509",
+      "size": 44544
+    },
+    {
+      "id": "hwpx-01",
+      "path": "samples/hwpx/143E433F503322BD33.hwpx",
+      "gitBlobSha1": "b0634c00c43183875d68bac10be0bb4731e4dbdb",
+      "size": 169537
+    },
+    {
+      "id": "hwpx-02",
+      "path": "samples/hwpx/2025년 1분기 해외직접투자 보도자료f.hwpx",
+      "gitBlobSha1": "ee0090cdc5692e7b82cce5293884c697e52b53c4",
+      "size": 139568
+    },
+    {
+      "id": "hwpx-03",
+      "path": "samples/hwpx/2025년 2분기 해외직접투자 (최종).hwpx",
+      "gitBlobSha1": "e5e2521fa9187148a9816670a25bd6ecfa5f40ce",
+      "size": 134836
+    },
+    {
+      "id": "hwpx-04",
+      "path": "samples/hwpx/20260909-para-table.hwpx",
+      "gitBlobSha1": "5fa9e6854c21911e325288734080049cb873c297",
+      "size": 262679
+    },
+    {
+      "id": "hwpx-05",
+      "path": "samples/hwpx/2026_oss_rst.hwpx",
+      "gitBlobSha1": "dcb33a10e2d2acabb49c09bd313d17f121633a95",
+      "size": 61434
+    },
+    {
+      "id": "hwpx-06",
+      "path": "samples/hwpx/21761835_jeonjik_exemption_table.hwpx",
+      "gitBlobSha1": "0d70d5fd550201b935a9954b741d86c736a16236",
+      "size": 97654
+    },
+    {
+      "id": "hwpx-07",
+      "path": "samples/hwpx/basic-table-01.hwpx",
+      "gitBlobSha1": "e7096c5f45676ff6c00925f002bbd593089dcb78",
+      "size": 14650
+    },
+    {
+      "id": "hwpx-08",
+      "path": "samples/hwpx/blank_hwpx.hwpx",
+      "gitBlobSha1": "5b91f6c9c1335a0ce136365ed65eadcbad53a358",
+      "size": 12707
+    },
+    {
+      "id": "hwpx-09",
+      "path": "samples/hwpx/business_overview.hwpx",
+      "gitBlobSha1": "cca14dd19c9ae66beaefd828df7de457b505301c",
+      "size": 10157
+    },
+    {
+      "id": "hwpx-10",
+      "path": "samples/hwpx/el-school-001.hwpx",
+      "gitBlobSha1": "005e838f250f5b2c115c4d916d0f8d74d0cfdbf1",
+      "size": 78732
+    },
+    {
+      "id": "hwpx-11",
+      "path": "samples/hwpx/eq-002.hwpx",
+      "gitBlobSha1": "57fd4830975e3cd3917f88805e3a6966c1e605b4",
+      "size": 18665
+    },
+    {
+      "id": "hwpx-12",
+      "path": "samples/hwpx/exam_social-p1.hwpx",
+      "gitBlobSha1": "da2584e879c50027f38b1f0596a2797afff8fea6",
+      "size": 121201
+    },
+    {
+      "id": "hwpx-13",
+      "path": "samples/hwpx/expense_report.hwpx",
+      "gitBlobSha1": "888f0ec4a2d6a8f46f827f62d70aa980872db545",
+      "size": 10382
+    },
+    {
+      "id": "hwpx-14",
+      "path": "samples/hwpx/field-multipara-clickhere.hwpx",
+      "gitBlobSha1": "1228651451712e51a15cd3c131f015578bd452b6",
+      "size": 39711
+    },
+    {
+      "id": "hwpx-15",
+      "path": "samples/hwpx/footnote-01.hwpx",
+      "gitBlobSha1": "b8b98594a06a5117ce8ba6e88c79fc55eeb9028b",
+      "size": 65161
+    },
+    {
+      "id": "hwpx-16",
+      "path": "samples/hwpx/footnote-tbox-01.hwpx",
+      "gitBlobSha1": "e3fa925fee3579d2b7726dfaca8c9c9c25e83555",
+      "size": 16738
+    },
+    {
+      "id": "hwpx-17",
+      "path": "samples/hwpx/form-002.hwpx",
+      "gitBlobSha1": "c2378d9c43abadcf61c9531ed72449f5819d1995",
+      "size": 131571
+    },
+    {
+      "id": "hwpx-18",
+      "path": "samples/hwpx/form-01.hwpx",
+      "gitBlobSha1": "fc5ce63fad38440feaed089199e005740ca1ff94",
+      "size": 16001
+    },
+    {
+      "id": "hwpx-19",
+      "path": "samples/hwpx/form-02.hwpx",
+      "gitBlobSha1": "9d485b05cab53abf2a32e094351ee2d9e5a45630",
+      "size": 15969
+    },
+    {
+      "id": "hwpx-20",
+      "path": "samples/hwpx/hcar-001.hwpx",
+      "gitBlobSha1": "2ddf44d642510fbbdb2914a26a7b80b92f532bce",
+      "size": 112784
+    },
+    {
+      "id": "hwpx-21",
+      "path": "samples/hwpx/hwpx-h-02.hwpx",
+      "gitBlobSha1": "7d72ab0a1c7f858b0411407e54d2241caf0b8d31",
+      "size": 135414
+    },
+    {
+      "id": "hwpx-22",
+      "path": "samples/hwpx/hwpx-h-03.hwpx",
+      "gitBlobSha1": "c73c9de69092e73c6b79ed60cd6a96065435f21e",
+      "size": 138862
+    },
+    {
+      "id": "hwpx-23",
+      "path": "samples/hwpx/hy-001.hwpx",
+      "gitBlobSha1": "98149635a0e255e565c74daead0f3ab2c34a43cc",
+      "size": 180554
+    },
+    {
+      "id": "hwpx-24",
+      "path": "samples/hwpx/hy-002.hwpx",
+      "gitBlobSha1": "331585dee94ab3c13e06c5958beaebe56683f4b2",
+      "size": 107774
+    },
+    {
+      "id": "hwpx-25",
+      "path": "samples/hwpx/issue1535_coanchored_float_exclusion.hwpx",
+      "gitBlobSha1": "3553426f660a51f877b6234e963bf03d03dca444",
+      "size": 8345
+    },
+    {
+      "id": "hwpx-26",
+      "path": "samples/hwpx/issue1948_cross_para_fieldend.hwpx",
+      "gitBlobSha1": "445924d8aede79fd20782121489f21868479bb85",
+      "size": 84885
+    },
+    {
+      "id": "hwpx-27",
+      "path": "samples/hwpx/issue2019_floating_form_74312.hwpx",
+      "gitBlobSha1": "6e1f8e2655eacfd0b48ab82548fb78645ad28e6b",
+      "size": 75276
+    },
+    {
+      "id": "hwpx-28",
+      "path": "samples/hwpx/issue2439_page_local_float_exclusion.hwpx",
+      "gitBlobSha1": "b49238dc267ee8bc9132a2c7f0575d0d5e2ba4a5",
+      "size": 8992
+    },
+    {
+      "id": "hwpx-29",
+      "path": "samples/hwpx/issue_1133.hwpx",
+      "gitBlobSha1": "f26157b267b16e262285be01e8d61ae881915fe4",
+      "size": 68094
+    },
+    {
+      "id": "hwpx-30",
+      "path": "samples/hwpx/issue_157.hwpx",
+      "gitBlobSha1": "2ea6fc8c2f43e1346aab3933c5580f7d52a0aa78",
+      "size": 35641
+    }
+  ]
+}

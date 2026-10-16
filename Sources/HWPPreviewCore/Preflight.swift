@@ -141,7 +141,7 @@ public enum Preflight {
             cursor += 46 + nameLength + extra + comment
             guard cursor <= end else { throw PreviewFailure.invalid }
         }
-        guard cursor == end, names.contains("Contents/content.hpf"), names.contains("META-INF/manifest.xml") else { throw PreviewFailure.invalid }
+        guard cursor == end, names.contains("Contents/content.hpf") else { throw PreviewFailure.invalid }
     }
     private static func xml(_ data: Data, cancellation: Cancellation) throws {
         // Reject declarations before XMLParser, including UTF-16/32 ASCII declarations.
