@@ -10,6 +10,9 @@ window.contentView = preview
 preview.previewItem = NSURL(fileURLWithPath:CommandLine.arguments[1])
 window.orderBack(nil)
 RunLoop.current.run(until:Date().addingTimeInterval(15))
+let formatter = DateFormatter()
+formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+print("observedUntil=\(formatter.string(from:Date()))")
 preview.close()
 window.orderOut(nil)
 print("Preview host closed; check org.hwp-preview/preview logs for render completion.")

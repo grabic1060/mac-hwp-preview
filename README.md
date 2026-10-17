@@ -25,7 +25,8 @@ Finder에서 `.hwp` 또는 `.hwpx` 파일을 선택하고 스페이스바를 누
 CLANG_MODULE_CACHE_PATH="$PWD/.build/module-cache" swift test --disable-sandbox --cache-path .build/cache --scratch-path .build/swift
 python3 scripts/test_wasm_limits.py
 bash scripts/fetch-fixtures.sh
-python3 scripts/verify-local.py
+python3 scripts/verify-local.py --system
+python3 scripts/test-preview-controller.py
 ```
 
 GUI 세션에서 실행해야 WebKit/Quick Look 검사가 가능합니다. Codex 등의 추가 샌드박스 안에서는 네이티브 GUI 프로브에 별도 실행 권한이 필요할 수 있습니다. `--disable-sandbox`는 SwiftPM의 빌드 샌드박스 옵션이며 제품 확장의 App Sandbox를 끄지 않습니다.
