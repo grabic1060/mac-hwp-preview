@@ -2,17 +2,7 @@ import { safeSVG, verifyImages } from './svg.js';
 let worker;
 let rejectRendering;
 window.cancelRendering = () => { worker?.terminate(); worker = undefined; rejectRendering?.(new Error('cancelled')); rejectRendering = undefined; };
-let scale = 1;
 const pages = document.getElementById('pages');
-function zoom(value) { scale = value; pages.style.width = `${100 * scale}%`; }
-document.getElementById('minus').onclick = () => zoom(Math.max(0.5, scale - 0.25));
-document.getElementById('plus').onclick = () => zoom(Math.min(3, scale + 0.25));
-document.getElementById('fit').onclick = () => zoom(1);
-document.getElementById('go').onclick = () => {
-    const number = document.getElementById('page-number').valueAsNumber;
-    if (Number.isInteger(number) && number >= 1 && number <= pages.children.length)
-        pages.children[number - 1].scrollIntoView({block:'start'});
-};
 window.renderDocument = async (base64, thumbnail) => {
     window.cancelRendering();
     pages.replaceChildren();
@@ -39,10 +29,7 @@ window.renderDocument = async (base64, thumbnail) => {
         };
         worker.postMessage({bytes,thumbnail},[bytes.buffer]);
     });
-    document.getElementById('page-number').max = String(count);
     const imageFailures = await verifyImages(pages);
-    const warnings = removed + imageFailures + engineWarnings;
-    document.getElementById('status').textContent = `${count}쪽 · 실험적 미리보기: 글꼴·배치 차이 가능${warnings ? ` · 표시 주의 ${warnings}건 (이미지 실패 ${imageFailures}건)` : ''}`;
     await new Promise(resolve => setTimeout(resolve, 0));
     const svg = pages.querySelector('svg');
     const box = svg.viewBox.baseVal;

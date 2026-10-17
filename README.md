@@ -1,6 +1,6 @@
 # HWP Preview
 
-macOS Finder의 Quick Look에서 HWP 5.x와 HWPX를 페이지 형태로 표시하는 **개발용 alpha**입니다. 두 형식의 본문·표·이미지를 같은 경로로 렌더링하며, 페이지 이동·확대·너비 맞춤과 첫 페이지 썸네일을 제공합니다.
+macOS Finder의 Quick Look에서 HWP 5.x와 HWPX를 페이지 형태로 표시하는 **개발용 alpha**입니다. 두 형식의 본문·표·이미지를 같은 경로로 렌더링하며, 상단 바 없이 너비에 맞춘 문서를 스크롤하며 읽을 수 있고 첫 페이지 썸네일을 제공합니다.
 
 현재 공식 한글 기준 출력과의 정밀 비교는 미완료입니다. 정식 배포 준비가 끝난 제품으로 간주하지 마세요. 단계별 근거와 미충족 조건은 [구현 상태](docs/IMPLEMENTATION_STATUS.md), [원래 계획](IMPLEMENTATION_PLAN.md)에 기록합니다.
 

@@ -38,6 +38,12 @@ final class PreviewController: NSViewController, QLPreviewingController {
             }
         }
     }
+    // Consume clicks left unhandled by the document view. Forwarding them to
+    // Quick Look's host can invoke its open-document action. WebKit still handles
+    // text selection and scrolling before events reach this responder.
+    override func mouseDown(with event: NSEvent) {}
+    override func mouseUp(with event: NSEvent) {}
+
     // Visibility changes are not request cancellation: Quick Look reparents/hides
     // remote views while preparing, resizing and switching presentation modes.
     // Release on the next request or controller destruction instead.
