@@ -1,0 +1,52 @@
+name: Build and publish release
+on:
+  push:
+    tags:
+      - 'v[0-9]*'
+permissions:
+  contents: write
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Validate tag and architecture
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          test "$(uname -m)" = arm64
+          python3 scripts/release-notes.py "$RELEASE_TAG" > /tmp/release-notes.md
+      - name: Fetch pinned dependencies
+        run: |
+          bash scripts/fetch-wasm.sh
+          python3 scripts/fetch-sparkle.py
+      - name: Test
+        run: |
+          swift test --disable-sandbox
+          python3 scripts/test_wasm_limits.py
+          python3 scripts/test_release_config.py
+          python3 scripts/test-update-signature.py
+      - name: Build and package (adhoc, no Developer ID)
+        run: |
+          python3 scripts/build-app.py
+          python3 scripts/package-local.py
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          # Never overwrite an existing release or replace its immutable assets.
+          gh release create "$RELEASE_TAG" .build/releases/*.zip .build/releases/*.sha256 \
+            --verify-tag --draft --title "HWP Preview $RELEASE_TAG" --notes-file /tmp/release-notes.md
+          if [[ "$RELEASE_TAG" == *-* ]]; then
+            gh release edit "$RELEASE_TAG" --draft=false --prerelease
+          else
+            gh release edit "$RELEASE_TAG" --draft=false --latest
+          fi

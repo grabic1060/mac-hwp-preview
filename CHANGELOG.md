@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0 — 2026-10-19
+
+- 첫 공개 ZIP 배포입니다. Finder에서 HWP 5.x/HWPX 본문·페이지·표·이미지와 썸네일을 표시합니다.
+- 앱에서 Quick Look 설정으로 이동할 수 있으며 문서 미리보기는 상단 바 없이 표시합니다.
+- 버전 태그 push 시 GitHub Actions가 Apple Silicon 앱을 빌드·검사하고 ZIP과 SHA-256을 Releases에 게시합니다. 태그와 VERSION이 다르면 게시하지 않습니다.
+- Developer ID 서명·공증은 제외하고 adhoc 서명을 사용합니다. README와 릴리스 노트에 설치 및 앱에 한정된 `xattr` 격리 속성 제거 명령을 포함했습니다.
+- CI에는 Sparkle 개인 키가 없으므로 앱 내 자동 업데이트 feed는 아직 갱신하지 않습니다. 새 버전은 Releases에서 수동 설치할 수 있습니다.
+- BUILD_NUMBER 12. 원본 출력 충실도·이전 macOS 실기 검증은 진행 중이며 Intel 빌드는 제공하지 않습니다.
+
 ## 0.1.0-alpha.5 — 2026-10-19
 
 - Sparkle 2.10.0 기반 업데이트 확인·다운로드·교체 흐름을 호스트 앱에 통합했습니다. 앱 실행 시 및 실행 중 주기적으로 확인하고 수동 확인 버튼을 제공합니다. 로그인 항목이나 LaunchAgent는 설치하지 않으며 Quick Look 확장에서 업데이트를 실행하지 않습니다.

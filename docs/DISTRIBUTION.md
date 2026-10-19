@@ -1,10 +1,14 @@
 # 서명·공증·자동 업데이트 배포
 
+## v0.1.0부터의 기본 공개 배포
+
+버전 태그 push 시 `.github/workflows/release.yml`이 Developer ID 없이 adhoc 서명한 arm64 ZIP을 Releases에 게시합니다. Apple 공증과 Sparkle appcast 서명은 이 워크플로에 포함되지 않습니다. 설치 및 Gatekeeper 안내는 README와 `release/INSTALL.md`를 참고하세요. 아래 절차는 추후 공증 또는 별도 업데이트 서명 키를 사용하는 수동 배포 경로입니다.
+
 ## 현재 상태
 
 Sparkle 2.10.0을 호스트 앱에 통합했습니다. Quick Look 확장은 업데이트를 확인하지 않습니다. 앱 실행 직후와 앱이 실행 중인 동안 Sparkle 주기(기본 24시간)로 확인하며, 사용자의 Sparkle 설정을 존중합니다. 로그인 항목, LaunchAgent, 상주 업데이트 서비스를 설치하지 않습니다. 설치 시에만 Sparkle의 임시 설치 도우미가 실행됩니다. 기본적으로 업데이트 다운로드·설치는 사용자 확인을 거칩니다.
 
-기본 빌드는 `release/update-config.json`의 공개 GitHub HTTPS feed를 사용합니다. 현재 feed는 비어 있어 공개 업데이트가 없으며 GitHub Releases는 게시하지 않았습니다. 빈 JSON을 `--update-config`로 지정한 빌드는 네트워크 확인을 하지 않으며 업데이트 버튼이 비활성화됩니다. 사용자가 제공해야 하는 주소와 Developer ID Application 인증서를 대신하여 가짜 주소나 Apple Development 서명을 사용하지 않습니다.
+기본 빌드는 `release/update-config.json`의 공개 GitHub HTTPS feed를 사용합니다. 현재 feed는 비어 있어 공개 업데이트가 없으며 v0.1.0부터 GitHub Releases에 ZIP을 게시합니다. 업데이트 feed에는 아직 항목을 추가하지 않습니다. 빈 JSON을 `--update-config`로 지정한 빌드는 네트워크 확인을 하지 않으며 업데이트 버튼이 비활성화됩니다. 사용자가 제공해야 하는 주소와 Developer ID Application 인증서를 대신하여 가짜 주소나 Apple Development 서명을 사용하지 않습니다.
 
 ## 최초 설정
 
@@ -35,7 +39,7 @@ python3 scripts/prepare-release.py --allow-unnotarized \
   --download-url-prefix 'https://github.com/grabic1060/mac-hwp-preview/releases/download/v0.1.0-alpha.5/'
 ```
 
-위 URL은 향후 게시 위치이며 현재 Release는 존재하지 않습니다. 스크립트는 로컬 산출물만 만들고 게시하지 않습니다. 현재 macOS에서 실제 업데이트 서명 키 접근 요청이 취소되었으므로 배포 feed 생성 시 키체인 접근 허용이 필요합니다.
+위 URL은 향후 게시 위치이며 해당 alpha.5 Release는 존재하지 않습니다. 스크립트는 로컬 산출물만 만들고 게시하지 않습니다. 현재 macOS에서 실제 업데이트 서명 키 접근 요청이 취소되었으므로 배포 feed 생성 시 키체인 접근 허용이 필요합니다.
 
 실제 값으로 바꿔 실행합니다. build-app은 올바른 Developer ID와 업데이트 설정이 없으면 출력 앱을 지우기 전에 중단합니다. 안쪽 Sparkle 도우미·프레임워크 → Quick Look 확장 → 앱 순서로 Hardened Runtime 및 timestamp를 적용합니다. 개발 빌드는 `--release` 없이 adhoc 서명합니다.
 
