@@ -3,3 +3,10 @@
 .DS_Store
 __pycache__/
 *.pyc
+
+.vscode/
+*.p12
+*.p8
+*.key
+.env
+.env.*

@@ -10,6 +10,7 @@ macOS Finder의 Quick Look에서 HWP 5.x와 HWPX를 페이지 형태로 표시�
 
 ```sh
 bash scripts/fetch-wasm.sh
+python3 scripts/fetch-sparkle.py
 python3 scripts/build-app.py
 bash scripts/register-app.sh
 open '.build/app/HWP Preview.app'
@@ -51,3 +52,11 @@ python3 scripts/package-local.py
 `.build/releases`에 adhoc 서명된 개발용 ZIP과 SHA256이 생성됩니다. Developer ID 서명·공증·Gatekeeper 배포 검증은 수행하지 않았습니다. 공개 배포 전 기준 문서, 글꼴, 접근성, OS/CPU 호환성, 의존성 고지의 검증이 필요합니다.
 
 버전 변경 내역은 [CHANGELOG](CHANGELOG.md), 라이선스 고지는 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)를 참고하세요.
+
+## 자동 업데이트와 배포 서명
+
+앱 실행 시와 실행 중에만 Sparkle로 업데이트를 확인하며 별도 시작 프로그램은 설치하지 않습니다. 공개 저장소의 HTTPS feed를 사용하며 아직 게시한 업데이트는 없습니다. Developer ID 인증서와 HTTPS 배포 주소를 준비한 후 [배포 절차](docs/DISTRIBUTION.md)에 따라 서명·공증·appcast를 생성합니다.
+
+## 라이선스
+
+이 저장소의 자체 코드는 [MIT](LICENSE) 라이선스입니다. RHWP와 Sparkle 등 제3자 코드는 각각의 라이선스를 따르며 [의존성 고지](THIRD_PARTY_NOTICES.md)와 `ThirdParty/`에 원문을 포함합니다. 평가용 외부 문서와 폰트는 배포하지 않습니다. 현재 앱은 Developer ID 서명·공증이 없는 개발판이며 공개 소스 저장소 생성이 바이너리 정식 출시를 의미하지는 않습니다.
