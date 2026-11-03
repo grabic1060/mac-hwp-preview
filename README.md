@@ -99,28 +99,6 @@ python3 scripts/test-updates.py
 
 ```
 
-### 릴리스 배포
-
-1. `VERSION`, `BUILD_NUMBER`, `CHANGELOG.md` 파일을 수정하고 커밋합니다. (새 릴리스 시 `BUILD_NUMBER`도 함께 올려야 합니다.)
-2. 버전과 일치하는 Git 태그를 생성하여 푸시하면 [GitHub Actions](.github/workflows/release.yml)가 자동으로 테스트, 빌드, GitHub Release 게시를 수행합니다. (`-alpha.N` 형식의 태그는 Pre-release로 분류됩니다.)
-
-```sh
-git tag -a v0.1.0 -m 'Release v0.1.0'
-git push origin main
-git push origin v0.1.0
-
-```
-
-추후 Apple Developer ID 서명·공증 및 Sparkle 자동 업데이트 피드를 연결하는 방법은 [배포 문서](docs/DISTRIBUTION.md)를 참고하세요.
-
 ## 라이선스
 
 이 프로젝트의 자체 코드는 [MIT License](LICENSE)를 따릅니다. 내부에 사용된 RHWP, Sparkle 등 외부 라이브러리는 각각의 라이선스가 적용되며, 자세한 내용은 [ThirdParty](ThirdParty/) 폴더와 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에서 확인할 수 있습니다.
-
----
-
-### 주요 수정 포인트
-
-1. **불필요한 변명 및 내부 사정 제거**: "macOS 26에서 검증했다", "최소 버전 빌드와 실기 검증은 별개다", "CI에 업데이트 서명 키를 연결하기 전까지 피드를 게시하지 않는다", "테스트 통과가 레이아웃 일치를 보장하지 않는다" 등 사용자에게 혼란을 주는 방어적 문구를 삭제했습니다.
-2. **전문 용어 순화**: `adhoc 서명` 같은 개발 용어를 빼고 일반 사용자가 이해하기 쉽도록 "Apple 개발자 서명(공증)이 적용되어 있지 않아..."로 풀어서 설명했습니다.
-3. **가독성 개선**: Gatekeeper 우회 방법을 시스템 설정(GUI)과 **터미널(CLI)** 두 가지로 명확히 나누고, 일반 사용자가 잘 쓰지 않는 `shasum` 무결성 검사는 `<details>` 접기 태그로 숨겨 문서를 깔끔하게 정리했습니다.
